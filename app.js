@@ -6,9 +6,9 @@ const
   request = require('request'),
   express = require('express'),
   bodyParser = require('body-parser'),
-  app = express()
-  webhooks = require('./routes/webhooks');
-
+  app = express(),
+  webhooks = require('./routes/webhooks'),
+  Rx = require('rxjs/Rx');
 // Sets server port and logs message on success
 app.listen(process.env.PORT || 1337, () => {
 

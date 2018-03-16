@@ -2,7 +2,8 @@ const
   bodyParser = require('body-parser'),
   request = require('request'),
   Data = require('../data/get_data'),
-  task = require('./function')
+  task = require('./function'),
+  rx = require('rxjs/Rx');
 
 const handleMessage = (sender_psid, received_message) => {
 
