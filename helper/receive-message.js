@@ -6,13 +6,9 @@ const
   rx = require('rxjs/Rx');
 
 const handleMessage = (sender_psid, received_message) => {
-
   let response;
-
   console.log(received_message.text);
-
   let key = task.checkSpell(received_message.text);
-
   console.log(key);
 
   // Check if the message contains text
@@ -41,18 +37,34 @@ const handleMessage = (sender_psid, received_message) => {
             "method": "GET",
             "json": true,
           }, (err, res, body) => {
+
           // Test
             if (err) {
               console.error("Unable to send message:" + err);
             } else {
               let time = task.timeFormat(reply[2], body.timezone);
               let team = task.teamFormat(reply[0], reply[1], key);
+
             // Create the payload for a basic text message
               response = {
                 "text": `${team[0]} will play against ${team[1]} on *${time}*, for ${reply[3]}.`
               }
-              console.log("replied");
-              callSendAPI(sender_psid, response); 
+
+              callSendAPI(sender_psid, response);
+
+              var today = new Date()
+              response = {
+                "text" : "Please wait for 5 seconds"
+              }
+              callSendAPI(sender_psid, response);
+              var matchDate = new Date()
+              matchDate.setSeconds(matchDate.getSeconds() + 5)
+              setTimeout(() => {
+                response = {
+                  "text" : "Thank you for waiting"
+                }
+                callSendAPI(sender_psid, response);
+              }, matchDate - today); 
             }
         })
       }
@@ -72,6 +84,7 @@ const callSendAPI = (sender_psid, response) => {
   // Send the HTTP request to the Messenger Platform
   request({
     "uri": "https://graph.facebook.com/v2.6/me/messages",
+    // "uri": "http://localhost:3100/v2.6",
     "qs": { "access_token": process.env.PAGE_ACCESS_TOKEN},
     "method": "POST",
     "json": request_body
