@@ -1,34 +1,59 @@
-let team_name = ['AFC Bournemouth', 'Arsenal', 'Brighton & Hove Albion', 'Burnley', 'Chelsea', 'Crystal Palace', 'Everton', 'Huddersfield Town', 'Leicester City', 'Liverpool', 'Manchester City', 'Manchester United', 'Newcastle United', 'Southampton', 'Stoke City', 'Swansea City', 'Tottenham Hotspur', 'Watford', 'West Bromwich Albion', 'West Ham United', 'Alavés', 'Athletic Bilbao', 'Atletico Madrid', 'Barcelona', 'Celta Vigoance', 'Deportivo La Coruña', 'Eibar', 'Espanyol', 'Getafe', 'Girona', 'Las Palmas', 'Leganes', 'Levante', 'Málaga', 'Real Betis', 'Real Madrid', 'Real Sociedad', 'Sevilla', 'Valencia', 'Villarreal', 'Argentina', 'Australia', 'Belgium', 'Brazil', 'Chile', 'Colombia', 'England', 'France', 'Germany', 'Ghana', 'Italy', 'Ivory Coast', 'Mexico', 'Netherlands', 'Nigeria', 'Portugal', 'Spain', 'United States', 'Uruguay']
+var file = require('./teamName')
+var popular = require('./popularTeam')
 
-let team_code = [['BOU', 1], ['ARS', 2], ['BRH', 3], ['BUR', 4], ['CHE', 5], ['CRY', 6], ['EVE', 7], ['HDD', 8], ['LEI', 9], ['LIV', 10], ['NEW', 13], ['SOU', 14], ['STK', 15], ['SWA', 16], ['TOT', 17], ['WAT', 18], ['WBA', 19], ['WHU', 20], ['ALV', 21], ['ATB', 22], ['ATM', 23], ['FCB', 24], ['CLV', 25], ['COR', 26], ['EIB', 27], ['ESY', 28], ['GET', 29], ['GIR', 30], ['LAP', 31], ['LEG', 32], ['LVT', 33], ['MLA', 34], ['BET', 35], ['MAD', 36], ['SOC', 37], ['SEV', 38], ['VAL', 39], ['VIL', 40], ['ARG', 41], ['AUS', 42], ['BEL', 43], ['BRA', 44], ['CHL', 45], ['COL', 46], ['ENG', 47], ['FRA', 48], ['GER', 49], ['GHA', 50], ['ITA', 51], ['CIV', 52], ['MEX', 53], ['NLD', 54], ['NGA', 55], ['POR', 56], ['ESP', 57], ['USA', 58], ['URY', 59], ['MCI', 11], ['MC', 11], ['MUN', 12], ['MU', 12], ['MAN UTD', 12], [' MANUTD', 12], ['MANU', 12]]
+function checkSpellName(name) {
+	var correctTeam = ""
+	var flag = true
+	var identityTeam = []
 
-
-function checkSpell(name) {
-	var flag = false;
-	var key = name.toUpperCase();
-	var len = key.length;
-
-	// Need more work to distinguish names
-	for (var i = 0; i < team_name.length; i++) {
-		if (key.valueOf() == team_name[i].substring(0,len).toUpperCase().valueOf()) {
-			flag = true;
-			key = team_name[i];
-			break;
-		}
-	}
-	if (flag == false) {
-		for (var i = 0; i < team_code.length; i++) {
-			if (key.valueOf().toUpperCase() == team_code[i][0].toUpperCase().valueOf()) {
-				key = team_name[team_code[i][1] - 1];
-				flag = true;
-				break;
+	name = name.replace(/\s/g,'').toUpperCase();
+	for (var key in file) {
+		if (flag) {
+			array = file[key]
+			team = key.replace(/\s/g,'').toUpperCase()
+			// Check to see if the specific team name has duplicate with other team name at diffrent location
+			if ((name.length >= 4) && team.indexOf(name) !== -1) {
+				identityTeam.push(key)
 			}
+			for (var i in array) {
+				// Check to see if the team name same as shortcut name
+				if (name == array[i].replace(/\s/g,'').toUpperCase()) {
+					correctTeam = key
+					flag = false
+					break
+				//	Check to see if the specific team name has duplicate with other team name at same location
+				} else if (name == array[i].replace(/\s/g,'').substring(0, name.length).toUpperCase()) {
+					if (identityTeam.includes(key) == false) {
+						identityTeam.push(key)
+					}
+				}
+			}
+		} else {
+			break
 		}
 	}
-	if (flag == true)
-		return key;
-	else
-		return "";
+	//Final Check		
+	switch(identityTeam.length) {
+		case 0:
+			return correctTeam
+			break
+		case 1:
+			return identityTeam[0]
+			break;
+		// Handle multiple teams
+		default:
+			return identityTeam
+			break
+	}
+}
+
+function completeName(key) {
+	newKey = ""
+	for (i = 0; i < key.length - 1; i++) {
+		newKey = newKey + key[i] + ", "
+	}
+	newKey += "or " + key[key.length-1]
+	return newKey
 }
 
 function timeFormat(inputTime, timezone) {
@@ -52,6 +77,29 @@ function timeFormat(inputTime, timezone) {
 	return answer;
 }
 
+// Handle the UI quick replies
+function quickReplies(value){
+	var finalArr = []
+	for (i = 0; i < value.length; i++) {
+		map = {}
+		map["content_type"] = "text"
+		map["title"] = value[i]
+		map["payload"] = "value"
+		finalArr.push(map)
+	}
+	return finalArr
+}
+
+//Popular teams
+function popularTeam() {
+	arr = []
+	for (var key in popular) {
+		arr.push(key)
+	}
+	return arr
+}
+
+// Team format
 function teamFormat(team1, team2, key) {
 	var check = team1;
 	team1 = "*" + team1 + "*" + "  _(Home team)_";
@@ -63,7 +111,10 @@ function teamFormat(team1, team2, key) {
 }
 
 module.exports = {
-	checkSpell,
+	checkSpellName,
 	timeFormat,
-	teamFormat
+	teamFormat,
+	completeName,
+	quickReplies,
+	popularTeam
 };
