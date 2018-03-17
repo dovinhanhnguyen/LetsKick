@@ -15,8 +15,8 @@ describe('bot test', function() {
 
   it('hi', function(){
     const script = new BotTester.Script('132', '20');
-    script.sendTextMessage('Atletico Madrid');  //mock user sending "hi"
-    script.sendTextMessage('Arsenal');
+    script.sendTextMessage('Arse');  //mock user sending "hi"
+    // script.sendTextMessage('Arsenal');
     return tester.runScript(script);
   });
 })

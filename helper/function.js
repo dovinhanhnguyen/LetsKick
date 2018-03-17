@@ -2,12 +2,15 @@ var file = require('./teamName')
 var popular = require('./popularTeam')
 
 const
-	request = require('request')
+	request = require('request');
 
 function checkSpellName(name) {
 	var correctTeam = ""
 	var flag = true
 	var identityTeam = []
+	if (name == "Set Reminder") {
+		return name
+	}
 
 	name = name.replace(/\s/g,'').toUpperCase();
 	for (var key in file) {
@@ -81,7 +84,7 @@ function timeFormat(inputTime, timezone) {
 }
 
 // Handle the UI quick replies
-function quickReplies(value){
+function quickReplies(value) {
 	var finalArr = []
 	for (i = 0; i < value.length; i++) {
 		map = {}
@@ -92,15 +95,6 @@ function quickReplies(value){
 	}
 	return finalArr
 }
-
-//Popular teams
-// function popularTeam() {
-// 	arr = []
-// 	for (var key in popular) {
-// 		arr.push(key)
-// 	}
-// 	return arr
-// }
 
 // Team format
 function teamFormat(team1, team2, key) {
@@ -113,7 +107,7 @@ function teamFormat(team1, team2, key) {
 	return [team1, team2];
 }
 
-function callSendAPI(sender_psid, response) {
+function callSendAPI(sender_psid, response, flag) {
     let request_body = {
     "recipient": {
       "id": sender_psid
@@ -131,47 +125,62 @@ function callSendAPI(sender_psid, response) {
   }, (err, res, body) => {
     if (err) {
       console.error("Unable to send message:" + err);
-    }
-  });
-}
-
-function buttonSet(sender_psid, time) {
-
-    let request_body = {
-    "recipient": {
-      "id": sender_psid
-    },
-    "message":{
-      "attachment":{
-        "type":"template",
-        "payload":{
-          "template_type":"button",
-          "text":"Do you want to set the time above to reminder?",
-          "buttons":[
-            {
-              "type":"web_url",
-              "url":"https://www.google.com",
-              "title":"Click to set"
-              // "payload":time
-            }
-          ]
+    } else if (flag == true) {
+        ask = {
+            "text": `Do you want to set the time above to reminder?`,
         }
-      }
-    }
-    }
-  // Send the HTTP request to the Messenger Platform
-  request({
-    "uri": "https://graph.facebook.com/v2.6/me/messages",
-    // "uri": "http://localhost:3100/v2.6",
-    "qs": { "access_token": process.env.PAGE_ACCESS_TOKEN},
-    "method": "POST",
-    "json": request_body
-  }, (err, res, body) => {
-    if (err) {
-      console.error("Unable to send message:" + err);
+        // var count = 0
+        // var i = 1
+        // while (count < 1) {
+        // 	i += 1
+        // 	if (response.text[i] == '*')
+        // 		count += 1
+        // }
+        // var res = response.text.substr(1, i - 1)
+        var newKey = "Set Reminder"
+        // console.log(newKey)
+        quickReply(sender_psid, ask, [newKey]);
     }
   });
 }
+
+// function buttonSet(sender_psid, time) {
+
+//     let request_body = {
+//     "recipient": {
+//       "id": sender_psid
+//     },
+//     "message":{
+//       "attachment":{
+//         "type":"template",
+//         "payload":{
+//           "template_type":"button",
+//           "text":"Do you want to set the time above to reminder?",
+//           "buttons":[
+//             {
+//               "type":"web_url",
+//               "url":"https://www.google.com",
+//               "title":"Click to set"
+//               // "payload":time
+//             }
+//           ]
+//         }
+//       }
+//     }
+//     }
+//   // Send the HTTP request to the Messenger Platform
+//   request({
+//     "uri": "https://graph.facebook.com/v2.6/me/messages",
+//     // "uri": "http://localhost:3100/v2.6",
+//     "qs": { "access_token": process.env.PAGE_ACCESS_TOKEN},
+//     "method": "POST",
+//     "json": request_body
+//   }, (err, res, body) => {
+//     if (err) {
+//       console.error("Unable to send message:" + err);
+//     }
+//   });
+// }
 
 
 function quickReply (sender_psid, response, value) {
@@ -206,6 +215,5 @@ module.exports = {
 	completeName,
 	quickReplies,
 	callSendAPI,
-	buttonSet,
 	quickReply
 };
