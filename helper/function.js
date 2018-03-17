@@ -1,6 +1,9 @@
 var file = require('./teamName')
 var popular = require('./popularTeam')
 
+const
+	request = require('request');
+
 function checkSpellName(name) {
 	var correctTeam = ""
 	var flag = true
@@ -91,13 +94,13 @@ function quickReplies(value){
 }
 
 //Popular teams
-function popularTeam() {
-	arr = []
-	for (var key in popular) {
-		arr.push(key)
-	}
-	return arr
-}
+// function popularTeam() {
+// 	arr = []
+// 	for (var key in popular) {
+// 		arr.push(key)
+// 	}
+// 	return arr
+// }
 
 // Team format
 function teamFormat(team1, team2, key) {
@@ -110,11 +113,99 @@ function teamFormat(team1, team2, key) {
 	return [team1, team2];
 }
 
+function callSendAPI(sender_psid, response) {
+    let request_body = {
+    "recipient": {
+      "id": sender_psid
+    },
+    "message": response
+
+    }
+  // Send the HTTP request to the Messenger Platform
+  request({
+    "uri": "https://graph.facebook.com/v2.6/me/messages",
+    // "uri": "http://localhost:3100/v2.6",
+    "qs": { "access_token": process.env.PAGE_ACCESS_TOKEN},
+    "method": "POST",
+    "json": request_body
+  }, (err, res, body) => {
+    if (err) {
+      console.error("Unable to send message:" + err);
+    }
+  });
+}
+
+function buttonSet(sender_psid, time) {
+
+    let request_body = {
+    "recipient": {
+      "id": sender_psid
+    },
+    "message":{
+      "attachment":{
+        "type":"template",
+        "payload":{
+          "template_type":"button",
+          "text":"Do you want to set the time above to reminder?",
+          "buttons":[
+            {
+              "type":"web_url",
+              "url":"https://www.google.com",
+              "title":"Click to set"
+              // "payload":time
+            }
+          ]
+        }
+      }
+    }
+    }
+  // Send the HTTP request to the Messenger Platform
+  request({
+    "uri": "https://graph.facebook.com/v2.6/me/messages",
+    // "uri": "http://localhost:3100/v2.6",
+    "qs": { "access_token": process.env.PAGE_ACCESS_TOKEN},
+    "method": "POST",
+    "json": request_body
+  }, (err, res, body) => {
+    if (err) {
+      console.error("Unable to send message:" + err);
+    }
+  });
+}
+
+
+function quickReply (sender_psid, response, value) {
+  jsonFile = task.quickReplies(value)
+    let request_body = {
+    "recipient": {
+      "id": sender_psid
+    },
+    "message": {
+      "text": response["text"],
+      "quick_replies": jsonFile
+    }
+    }
+  // Send the HTTP request to the Messenger Platform
+  request({
+    "uri": "https://graph.facebook.com/v2.6/me/messages",
+    // "uri": "http://localhost:3100/v2.6",
+    "qs": { "access_token": process.env.PAGE_ACCESS_TOKEN},
+    "method": "POST",
+    "json": request_body
+  }, (err, res, body) => {
+    if (err) {
+      console.error("Unable to send message:" + err);
+    }
+  });
+}
+
 module.exports = {
 	checkSpellName,
 	timeFormat,
 	teamFormat,
 	completeName,
 	quickReplies,
-	popularTeam
+	callSendAPI,
+	buttonSet,
+	quickReply
 };
